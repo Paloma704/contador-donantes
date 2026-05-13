@@ -20,6 +20,8 @@
     .container {
       text-align: center;
       user-select: none;
+      position: relative;
+      z-index: 2;
     }
 
     .titulo {
@@ -52,6 +54,7 @@
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.25s ease;
+      z-index: 1;
     }
 
     .flash.activo {
@@ -99,6 +102,7 @@
     }
   </style>
 </head>
+
 <body>
 
 <div id="flash" class="flash"></div>
@@ -141,6 +145,7 @@
   let animacionActiva = null;
 
   const contadorEl = document.getElementById("contador");
+  const flashEl = document.getElementById("flash");
 
   function mostrarNumero(numero) {
     contadorEl.innerText = Math.floor(numero).toLocaleString("es-ES");
@@ -151,6 +156,13 @@
 
     const duracion = 1000;
     const inicio = performance.now();
+
+    contadorEl.classList.add("animando");
+    flashEl.classList.add("activo");
+
+    setTimeout(() => {
+      flashEl.classList.remove("activo");
+    }, 180);
 
     function animar(tiempoActual) {
       const progreso = Math.min((tiempoActual - inicio) / duracion, 1);
@@ -163,6 +175,7 @@
         animacionActiva = requestAnimationFrame(animar);
       } else {
         mostrarNumero(numeroFinal);
+        contadorEl.classList.remove("animando");
       }
     }
 
@@ -170,18 +183,45 @@
     animacionActiva = requestAnimationFrame(animar);
   }
 
-  // 🔥 ESCUCHA CAMBIOS EN TIEMPO REAL
   db.ref("contador").on("value", (snapshot) => {
     contador = snapshot.val() || 0;
     animarHasta(contador);
   });
 
-  // 🔥 SUMAR
   function sumar() {
-    db.ref("contador").set(contador + 1);
+    db.ref("contador").transaction((valorActual) => {
+      return (valorActual || 0) + 1;
+    });
+  }
+
+  function restar() {
+    db.ref("contador").transaction((valorActual) => {
+      return Math.max((valorActual || 0) - 1, 0);
+    });
+  }
+
+  function resetear() {
+    db.ref("contador").set(0);
+  }
+
+  function guardarManual() {
+    const valor = Number(document.getElementById("manual").value);
+
+    if (!isNaN(valor) && valor >= 0) {
+      db.ref("contador").set(Math.floor(valor));
+    }
+  }
+
+  function pantallaCompleta() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
   }
 
   document.body.addEventListener("click", sumar);
 </script>
+
 </body>
 </html>
