@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Talent Supporters</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #224BA0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+      user-select: none;
+    }
+
+    .titulo {
+      font-family: Georgia, serif;
+      font-size: 56px;
+      font-weight: normal;
+      color: #FFFFFF;
+      margin-bottom: 28px;
+      letter-spacing: 1px;
+    }
+
+    .contador {
+      font-size: 150px;
+      font-weight: bold;
+      color: #FFFFFF;
+      line-height: 1;
+      text-shadow: 0 0 25px rgba(255,255,255,0.35);
+      transition: transform 0.15s ease, text-shadow 0.15s ease;
+    }
+
+    .contador.animando {
+      transform: scale(1.22);
+      text-shadow: 0 0 45px rgba(255,255,255,0.95);
+    }
+
+    .flash {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.18);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .flash.activo {
+      opacity: 1;
+    }
+
+    .controls {
+      margin-top: 35px;
+      cursor: default;
+    }
+
+    button {
+      padding: 10px 18px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    input {
+      padding: 8px;
+      border-radius: 8px;
+      border: none;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    :fullscreen .controls {
+      display: none;
+    }
+
+    :fullscreen body {
+      cursor: none;
+    }
+
+    @media (max-width: 700px) {
+      .titulo {
+        font-size: 36px;
+      }
+
+      .contador {
+        font-size: 95px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div id="flash" class="flash"></div>
+
+<div class="container">
+  <div class="titulo">Talent Supporters</div>
+  <div id="contador" class="contador">0</div>
+
+  <div class="controls" onclick="event.stopPropagation()">
+    <button onclick="sumar()">+1</button>
+    <button onclick="restar()">-1</button>
+    <button onclick="resetear()">Reset</button>
+    <br>
+    <input type="number" id="manual" placeholder="Número">
+    <br>
+    <button onclick="guardarManual()">Guardar</button>
+    <br>
+    <button onclick="pantallaCompleta()">Pantalla completa</button>
+  </div>
+</div>
+
+<script>
+  let contador = Number(localStorage.getItem("donantes")) || 0;
+  let animacionActiva = null;
+  const contadorEl = document.getElementById("contador");
+  const flashEl = document.getElementById("flash");
+
+  function guardar() {
+    localStorage.setItem("donantes", contador);
+  }
+
+  function mostrarNumero(numero) {
+    contadorEl.innerText = Math.floor(numero).toLocaleString("es-ES");
+  }
+
+  function animarHasta(numeroFinal) {
+    if (animacionActiva) cancelAnimationFrame(animacionActiva);
+
+    const duracion = 1200;
+    const inicio = performance.now();
+
+    contadorEl.classList.add("animando");
+    flashEl.classList.add("activo");
+
+    setTimeout(() => {
+      flashEl.classList.remove("activo");
+    }, 180);
+
+    function animar(tiempoActual) {
+      const progreso = Math.min((tiempoActual - inicio) / duracion, 1);
+      const suavizado = 1 - Math.pow(1 - progreso, 4);
+      const numeroActual = numeroFinal * suavizado;
+
+      mostrarNumero(numeroActual);
+
+      if (progreso < 1) {
+        animacionActiva = requestAnimationFrame(animar);
+      } else {
+        mostrarNumero(numeroFinal);
+        contadorEl.classList.remove("animando");
+      }
+    }
+
+    mostrarNumero(0);
+    animacionActiva = requestAnimationFrame(animar);
+  }
+
+  function actualizar(conAnimacion = true) {
+    guardar();
+    if (conAnimacion) {
+      animarHasta(contador);
+    } else {
+      mostrarNumero(contador);
+    }
+  }
+
+  function sumar() {
+    contador++;
+    actualizar(true);
+  }
+
+  function restar() {
+    if (contador > 0) {
+      contador--;
+      actualizar(true);
+    }
+  }
+
+  function resetear() {
+    contador = 0;
+    actualizar(true);
+  }
+
+  function guardarManual() {
+    const valor = Number(document.getElementById("manual").value);
+    if (!isNaN(valor) && valor >= 0) {
+      contador = Math.floor(valor);
+      actualizar(true);
+    }
+  }
+
+  function pantallaCompleta() {
+    document.documentElement.requestFullscreen();
+  }
+
+  document.body.addEventListener("click", sumar);
+  actualizar(false);
+</script>
+
+</body>
+</html>
