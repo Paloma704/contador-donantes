@@ -120,15 +120,27 @@
   </div>
 </div>
 
-<script>
-  let contador = Number(localStorage.getItem("donantes")) || 0;
-  let animacionActiva = null;
-  const contadorEl = document.getElementById("contador");
-  const flashEl = document.getElementById("flash");
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
-  function guardar() {
-    localStorage.setItem("donantes", contador);
-  }
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyC8j98AtykKZ_yYTprEQA8RFvQC0VkCBfk",
+    authDomain: "contador-donantes.firebaseapp.com",
+    databaseURL: "https://contador-donantes-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "contador-donantes",
+    storageBucket: "contador-donantes.firebasestorage.app",
+    messagingSenderId: "1034153092788",
+    appId: "1:1034153092788:web:513cca586f0fe70fac19e1"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  let contador = 0;
+  let animacionActiva = null;
+
+  const contadorEl = document.getElementById("contador");
 
   function mostrarNumero(numero) {
     contadorEl.innerText = Math.floor(numero).toLocaleString("es-ES");
@@ -137,15 +149,8 @@
   function animarHasta(numeroFinal) {
     if (animacionActiva) cancelAnimationFrame(animacionActiva);
 
-    const duracion = 1200;
+    const duracion = 1000;
     const inicio = performance.now();
-
-    contadorEl.classList.add("animando");
-    flashEl.classList.add("activo");
-
-    setTimeout(() => {
-      flashEl.classList.remove("activo");
-    }, 180);
 
     function animar(tiempoActual) {
       const progreso = Math.min((tiempoActual - inicio) / duracion, 1);
@@ -158,7 +163,6 @@
         animacionActiva = requestAnimationFrame(animar);
       } else {
         mostrarNumero(numeroFinal);
-        contadorEl.classList.remove("animando");
       }
     }
 
@@ -166,47 +170,18 @@
     animacionActiva = requestAnimationFrame(animar);
   }
 
-  function actualizar(conAnimacion = true) {
-    guardar();
-    if (conAnimacion) {
-      animarHasta(contador);
-    } else {
-      mostrarNumero(contador);
-    }
-  }
+  // 🔥 ESCUCHA CAMBIOS EN TIEMPO REAL
+  db.ref("contador").on("value", (snapshot) => {
+    contador = snapshot.val() || 0;
+    animarHasta(contador);
+  });
 
+  // 🔥 SUMAR
   function sumar() {
-    contador++;
-    actualizar(true);
-  }
-
-  function restar() {
-    if (contador > 0) {
-      contador--;
-      actualizar(true);
-    }
-  }
-
-  function resetear() {
-    contador = 0;
-    actualizar(true);
-  }
-
-  function guardarManual() {
-    const valor = Number(document.getElementById("manual").value);
-    if (!isNaN(valor) && valor >= 0) {
-      contador = Math.floor(valor);
-      actualizar(true);
-    }
-  }
-
-  function pantallaCompleta() {
-    document.documentElement.requestFullscreen();
+    db.ref("contador").set(contador + 1);
   }
 
   document.body.addEventListener("click", sumar);
-  actualizar(false);
 </script>
-
 </body>
 </html>
