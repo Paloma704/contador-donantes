@@ -25,18 +25,14 @@
     }
 
     .titulo {
-      font-family: Georgia, serif;
-      font-size: 56px;
-      font-weight: normal;
-      color: #FFFFFF;
-      margin-bottom: 28px;
-      letter-spacing: 1px;
+      font-size: 90px;
+      font-weight: bold;
+      margin-bottom: 30px;
     }
 
     .contador {
-      font-size: 150px;
+      font-size: 220px;
       font-weight: bold;
-      color: #FFFFFF;
       line-height: 1;
       text-shadow: 0 0 25px rgba(255,255,255,0.35);
       transition: transform 0.15s ease, text-shadow 0.15s ease;
@@ -45,6 +41,20 @@
     .contador.animando {
       transform: scale(1.22);
       text-shadow: 0 0 45px rgba(255,255,255,0.95);
+    }
+
+    .subtitulo {
+      font-size: 36px;
+      margin-top: 20px;
+      opacity: 0.9;
+    }
+
+    .hashtag {
+      position: absolute;
+      bottom: 30px;
+      right: 40px;
+      font-size: 22px;
+      opacity: 0.8;
     }
 
     .flash {
@@ -93,11 +103,15 @@
 
     @media (max-width: 700px) {
       .titulo {
-        font-size: 36px;
+        font-size: 50px;
       }
 
       .contador {
-        font-size: 95px;
+        font-size: 120px;
+      }
+
+      .subtitulo {
+        font-size: 22px;
       }
     }
   </style>
@@ -110,18 +124,21 @@
 <div class="container">
   <div class="titulo">Talent Supporters</div>
   <div id="contador" class="contador">0</div>
+  <div class="subtitulo">Be the next to give</div>
+</div>
 
-  <div class="controls" onclick="event.stopPropagation()">
-    <button onclick="sumar()">+1</button>
-    <button onclick="restar()">-1</button>
-    <button onclick="resetear()">Reset</button>
-    <br>
-    <input type="number" id="manual" placeholder="Número">
-    <br>
-    <button onclick="guardarManual()">Guardar</button>
-    <br>
-    <button onclick="pantallaCompleta()">Pantalla completa</button>
-  </div>
+<div class="hashtag">#esadegiving</div>
+
+<div class="controls" onclick="event.stopPropagation()">
+  <button onclick="sumar()">+1</button>
+  <button onclick="restar()">-1</button>
+  <button onclick="resetear()">Reset</button>
+  <br>
+  <input type="number" id="manual" placeholder="Número">
+  <br>
+  <button onclick="guardarManual()">Guardar</button>
+  <br>
+  <button onclick="pantallaCompleta()">Pantalla completa</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -206,7 +223,6 @@
 
   function guardarManual() {
     const valor = Number(document.getElementById("manual").value);
-
     if (!isNaN(valor) && valor >= 0) {
       db.ref("contador").set(Math.floor(valor));
     }
