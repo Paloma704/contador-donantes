@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Talent Supporters</title>
+
   <style>
     body {
       margin: 0;
@@ -12,58 +13,82 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      overflow: hidden;
       color: white;
       cursor: pointer;
-      overflow: hidden;
     }
 
     .container {
       text-align: center;
-      user-select: none;
       position: relative;
       z-index: 2;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      transform: translateY(-80px);
     }
 
     .titulo {
       font-size: 90px;
       font-weight: bold;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
 
     .contador {
-      font-size: 220px;
+      font-size: 240px;
       font-weight: bold;
       line-height: 1;
+
       text-shadow: 0 0 25px rgba(255,255,255,0.35);
-      transition: transform 0.15s ease, text-shadow 0.15s ease;
+
+      transition:
+        transform 0.15s ease,
+        text-shadow 0.15s ease;
     }
 
     .contador.animando {
-      transform: scale(1.22);
+      transform: scale(1.20);
       text-shadow: 0 0 45px rgba(255,255,255,0.95);
     }
 
     .subtitulo {
       font-size: 36px;
-      margin-top: 20px;
-      opacity: 0.9;
+      margin-top: 10px;
+      opacity: 0.95;
+    }
+
+    .qr {
+      width: 330px;
+      margin-top: 35px;
+      border-radius: 18px;
     }
 
     .hashtag {
       position: absolute;
-      bottom: 30px;
-      right: 40px;
-      font-size: 22px;
-      opacity: 0.8;
+      bottom: 35px;
+      right: 45px;
+
+      font-size: 36px;
+      font-weight: bold;
+
+      opacity: 0.9;
+      z-index: 3;
     }
 
     .flash {
       position: fixed;
       inset: 0;
+
       background: rgba(255,255,255,0.18);
+
       pointer-events: none;
+
       opacity: 0;
+
       transition: opacity 0.25s ease;
+
       z-index: 1;
     }
 
@@ -72,13 +97,16 @@
     }
 
     .controls {
-      margin-top: 35px;
-      cursor: default;
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+
+      z-index: 10;
     }
 
     button {
-      padding: 10px 18px;
-      margin: 5px;
+      padding: 10px 16px;
+      margin: 4px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
@@ -89,7 +117,7 @@
       padding: 8px;
       border-radius: 8px;
       border: none;
-      margin-top: 10px;
+      margin-top: 8px;
       text-align: center;
     }
 
@@ -97,13 +125,10 @@
       display: none;
     }
 
-    :fullscreen body {
-      cursor: none;
-    }
-
     @media (max-width: 700px) {
+
       .titulo {
-        font-size: 50px;
+        font-size: 52px;
       }
 
       .contador {
@@ -113,7 +138,16 @@
       .subtitulo {
         font-size: 22px;
       }
+
+      .qr {
+        width: 220px;
+      }
+
+      .hashtag {
+        font-size: 22px;
+      }
     }
+
   </style>
 </head>
 
@@ -122,29 +156,73 @@
 <div id="flash" class="flash"></div>
 
 <div class="container">
-  <div class="titulo">Talent Supporters</div>
-  <div id="contador" class="contador">0</div>
-  <div class="subtitulo">Be the next to give</div>
+
+  <div class="titulo">
+    Talent Supporters
+  </div>
+
+  <div id="contador" class="contador">
+    0
+  </div>
+
+  <div class="subtitulo">
+    Be the next to give
+  </div>
+
+  <!-- IMPORTANTE:
+       SUBE TU QR A GITHUB
+       con el nombre EXACTO:
+       qr.png
+  -->
+  <img src="qr.png" class="qr">
+
 </div>
 
-<div class="hashtag">#esadegiving</div>
+<div class="hashtag">
+  #esadegiving
+</div>
 
 <div class="controls" onclick="event.stopPropagation()">
-  <button onclick="sumar()">+1</button>
-  <button onclick="restar()">-1</button>
-  <button onclick="resetear()">Reset</button>
+
+  <button onclick="sumar()">
+    +1
+  </button>
+
+  <button onclick="restar()">
+    -1
+  </button>
+
+  <button onclick="resetear()">
+    Reset
+  </button>
+
   <br>
-  <input type="number" id="manual" placeholder="Número">
+
+  <input
+    type="number"
+    id="manual"
+    placeholder="Número"
+  >
+
   <br>
-  <button onclick="guardarManual()">Guardar</button>
+
+  <button onclick="guardarManual()">
+    Guardar
+  </button>
+
   <br>
-  <button onclick="pantallaCompleta()">Pantalla completa</button>
+
+  <button onclick="pantallaCompleta()">
+    Pantalla completa
+  </button>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
+
   const firebaseConfig = {
     apiKey: "AIzaSyC8j98AtykKZ_yYTprEQA8RFvQC0VkCBfk",
     authDomain: "contador-donantes.firebaseapp.com",
@@ -156,6 +234,7 @@
   };
 
   firebase.initializeApp(firebaseConfig);
+
   const db = firebase.database();
 
   let contador = 0;
@@ -165,79 +244,28 @@
   const flashEl = document.getElementById("flash");
 
   function mostrarNumero(numero) {
-    contadorEl.innerText = Math.floor(numero).toLocaleString("es-ES");
+
+    contadorEl.innerText =
+      Math.floor(numero).toLocaleString("es-ES");
+
   }
 
   function animarHasta(numeroFinal) {
-    if (animacionActiva) cancelAnimationFrame(animacionActiva);
+
+    if (animacionActiva) {
+      cancelAnimationFrame(animacionActiva);
+    }
 
     const duracion = 1000;
+
     const inicio = performance.now();
 
     contadorEl.classList.add("animando");
+
     flashEl.classList.add("activo");
 
     setTimeout(() => {
+
       flashEl.classList.remove("activo");
-    }, 180);
 
-    function animar(tiempoActual) {
-      const progreso = Math.min((tiempoActual - inicio) / duracion, 1);
-      const suavizado = 1 - Math.pow(1 - progreso, 4);
-      const numeroActual = numeroFinal * suavizado;
-
-      mostrarNumero(numeroActual);
-
-      if (progreso < 1) {
-        animacionActiva = requestAnimationFrame(animar);
-      } else {
-        mostrarNumero(numeroFinal);
-        contadorEl.classList.remove("animando");
-      }
-    }
-
-    mostrarNumero(0);
-    animacionActiva = requestAnimationFrame(animar);
-  }
-
-  db.ref("contador").on("value", (snapshot) => {
-    contador = snapshot.val() || 0;
-    animarHasta(contador);
-  });
-
-  function sumar() {
-    db.ref("contador").transaction((valorActual) => {
-      return (valorActual || 0) + 1;
-    });
-  }
-
-  function restar() {
-    db.ref("contador").transaction((valorActual) => {
-      return Math.max((valorActual || 0) - 1, 0);
-    });
-  }
-
-  function resetear() {
-    db.ref("contador").set(0);
-  }
-
-  function guardarManual() {
-    const valor = Number(document.getElementById("manual").value);
-    if (!isNaN(valor) && valor >= 0) {
-      db.ref("contador").set(Math.floor(valor));
-    }
-  }
-
-  function pantallaCompleta() {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
-  }
-
-  document.body.addEventListener("click", sumar);
-</script>
-
-</body>
-</html>
+    }, 180
