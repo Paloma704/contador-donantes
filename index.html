@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Talent Supporters</title>
 
   <style>
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -102,6 +104,7 @@
       left: 20px;
 
       z-index: 10;
+      cursor: default;
     }
 
     button {
@@ -170,7 +173,7 @@
   </div>
 
   <!-- IMPORTANTE:
-       SUBE TU QR A GITHUB
+       Sube tu QR a GitHub
        con el nombre EXACTO:
        qr.png
   -->
@@ -184,15 +187,15 @@
 
 <div class="controls" onclick="event.stopPropagation()">
 
-  <button onclick="sumar()">
+  <button onclick="event.stopPropagation(); sumar();">
     +1
   </button>
 
-  <button onclick="restar()">
+  <button onclick="event.stopPropagation(); restar();">
     -1
   </button>
 
-  <button onclick="resetear()">
+  <button onclick="event.stopPropagation(); resetear();">
     Reset
   </button>
 
@@ -202,17 +205,18 @@
     type="number"
     id="manual"
     placeholder="Número"
+    onclick="event.stopPropagation();"
   >
 
   <br>
 
-  <button onclick="guardarManual()">
+  <button onclick="event.stopPropagation(); guardarManual();">
     Guardar
   </button>
 
   <br>
 
-  <button onclick="pantallaCompleta()">
+  <button onclick="event.stopPropagation(); pantallaCompleta();">
     Pantalla completa
   </button>
 
@@ -268,4 +272,114 @@
 
       flashEl.classList.remove("activo");
 
-    }, 180
+    }, 180);
+
+    function animar(tiempoActual) {
+
+      const progreso =
+        Math.min((tiempoActual - inicio) / duracion, 1);
+
+      const suavizado =
+        1 - Math.pow(1 - progreso, 4);
+
+      const numeroActual =
+        numeroFinal * suavizado;
+
+      mostrarNumero(numeroActual);
+
+      if (progreso < 1) {
+
+        animacionActiva =
+          requestAnimationFrame(animar);
+
+      } else {
+
+        mostrarNumero(numeroFinal);
+
+        contadorEl.classList.remove("animando");
+
+      }
+    }
+
+    mostrarNumero(0);
+
+    animacionActiva =
+      requestAnimationFrame(animar);
+
+  }
+
+  db.ref("contador").on("value", (snapshot) => {
+
+    contador = snapshot.val() || 0;
+
+    animarHasta(contador);
+
+  });
+
+  function sumar() {
+
+    db.ref("contador").transaction((valorActual) => {
+
+      return (valorActual || 0) + 1;
+
+    });
+
+  }
+
+  function restar() {
+
+    db.ref("contador").transaction((valorActual) => {
+
+      return Math.max((valorActual || 0) - 1, 0);
+
+    });
+
+  }
+
+  function resetear() {
+
+    db.ref("contador").set(0);
+
+  }
+
+  function guardarManual() {
+
+    const valor =
+      Number(document.getElementById("manual").value);
+
+    if (!isNaN(valor) && valor >= 0) {
+
+      db.ref("contador").set(Math.floor(valor));
+
+    }
+
+  }
+
+  function pantallaCompleta() {
+
+    if (!document.fullscreenElement) {
+
+      document.documentElement.requestFullscreen();
+
+    } else {
+
+      document.exitFullscreen();
+
+    }
+
+  }
+
+  document.body.addEventListener("click", function(event) {
+
+    if (event.target.closest(".controls")) {
+      return;
+    }
+
+    sumar();
+
+  });
+
+</script>
+
+</body>
+</html>
